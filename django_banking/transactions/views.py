@@ -137,6 +137,7 @@ class WithdrawMoneyView(TransactionCreateMixin):
 
 class TransferMoneyView(TransactionCreateMixin):
     form_class = TransferForm
+    template_name = 'transactions/transaction_transfer.html'
     title = 'This is transfer form'
 
     def get_initial(self):
