@@ -2,8 +2,10 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.views import LoginView
 from django.shortcuts import HttpResponseRedirect
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, RedirectView
+from .models import User, UserBankAccount, UserAddress
 
 from .forms import UserRegistrationForm, UserAddressForm
 
@@ -68,6 +70,24 @@ class UserLoginView(LoginView):
 
 class ProfileDisplayView(TemplateView):
     template_name = 'accounts/profile.html'
+
+    def get(self, request, *args, **kwargs):
+        email = request.user.email
+        gender = request.user.account.gender
+        account_no = request.user.account.account_no
+        birth_date = request.user.account.birth_date
+        balance = request.user.account.balance
+        address = request.user.address.street_address + ', ' + request.user.address.city + ', ' + request.user.address.country
+
+        dict = {"email": email,
+                "gender": gender,
+                "account_no": account_no,
+                "birth_date": birth_date,
+                "balance": balance,
+                "address": address,
+                }
+        return render(request, "accounts/profile.html", context=dict)
+
 
 class LogoutView(RedirectView):
     pattern_name = 'home'
