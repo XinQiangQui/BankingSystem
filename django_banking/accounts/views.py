@@ -5,7 +5,7 @@ from django.shortcuts import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, RedirectView
-from .models import User, UserBankAccount, UserAddress
+from accounts.models import User
 
 from .forms import UserRegistrationForm, UserAddressForm
 

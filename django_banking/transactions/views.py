@@ -5,15 +5,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView, ListView
+from django.shortcuts import render, redirect
+from accounts.models import User
 
-from transactions.constants import DEPOSIT, WITHDRAWAL
-from transactions.forms import (
+from .constants import DEPOSIT, WITHDRAWAL
+from .forms import (
     DepositForm,
     TransferForm,
     TransactionDateRangeForm,
     WithdrawForm,
 )
-from transactions.models import Transaction
+from .models import Transaction
 
 
 class TransactionRepostView(LoginRequiredMixin, ListView):
@@ -138,21 +140,50 @@ class WithdrawMoneyView(TransactionCreateMixin):
 class TransferMoneyView(TransactionCreateMixin):
     form_class = TransferForm
     template_name = 'transactions/transaction_transfer.html'
-    title = 'This is transfer form'
+    title = 'Transfer Money from Your Account'
+    acc_num = -1
 
     def get_initial(self):
         initial = {'transaction_type': WITHDRAWAL}
         return initial
 
-    def form_valid(self, form):
-        amount = form.cleaned_data.get('amount')
+    def post(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            self.acc_num = request.POST['accNum']
+            print(self.acc_num)
 
-        self.request.user.account.balance -= form.cleaned_data.get('amount')
-        self.request.user.account.save(update_fields=['balance'])
+        tmpUsers = list(User.objects.all().values())
+        for i in tmpUsers:
+            print(i)
+
+        return render(request, template_name='transactions/transaction_transfer.html')
+
+    def form_valid(self, form):
+        print("Hello")
+        amount = form.cleaned_data.get('amount')
+        print(self.acc_num)
+        target = None
+
+        tmpUsers = list(User.objects.all().values)
+        for i in tmpUsers:
+            print(i)
+            #(i.account.account_no)
+            #if i.account.account_no == accNum:
+            #    target = i
+
+        # otp
+
+        success = False
+        if success:
+            self.request.user.account.balance -= form.cleaned_data.get('amount')
+            self.request.user.account.save(update_fields=['balance'])
+            target.account.balance += form.cleaned_data.get('amount')
+            target.account.save(update_fields=['balance'])
 
         messages.success(
             self.request,
-            f'Successfully withdrawn {"{:,.2f}".format(float(amount))}$ from your account'
+            f'Successfully withdrawn {"{:,.2f}".format(float(amount))}$ from your account to target account :'
+            #{target.UserBankAccount.account_no}
         )
 
         return super().form_valid(form)
