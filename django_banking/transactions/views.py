@@ -85,7 +85,7 @@ class TransactionCreateMixin(LoginRequiredMixin, CreateView):
 
 class DepositMoneyView(TransactionCreateMixin):
     form_class = DepositForm
-    title = 'Deposit Money to Your Account'
+    title = 'Deposit Money'
 
     def get_initial(self):
         initial = {'transaction_type': DEPOSIT}
@@ -126,7 +126,7 @@ class DepositMoneyView(TransactionCreateMixin):
 
 class WithdrawMoneyView(TransactionCreateMixin):
     form_class = WithdrawForm
-    title = 'Withdraw Money from Your Account'
+    title = 'Withdraw Money'
 
     def get_initial(self):
         initial = {'transaction_type': WITHDRAWAL}
@@ -149,7 +149,7 @@ class WithdrawMoneyView(TransactionCreateMixin):
 class TransferMoneyView(TransactionCreateMixin):
     form_class = TransferForm
     template_name = 'transactions/transaction_transfer.html'
-    title = 'Transfer Money from Your Account'
+    title = 'Transfer Money'
 
     def get_initial(self):
         initial = {'transaction_type': TRANSFER}

@@ -1,6 +1,6 @@
-<nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6 px-10">
+<nav class="flex items-center justify-between flex-wrap bg-black p-10 px-20">
     <div class="flex items-center flex-shrink-0 text-white mr-6">
-        <span class="font-semibold text-xl tracking-tight text-white">Simple Banking System</span>
+        <span class="font-bold text-2xl tracking-tight text-white">MBanking System</span>
     </div>
     <div class="block lg:hidden">
         <button class="flex items-center px-3 py-2 border rounded text-white border-white-400 hover:text-white hover:border-white">
@@ -11,7 +11,7 @@
         {% if request.user.is_authenticated %}
             <div class="text-md lg:flex-grow">
                 <a href="{% url 'transactions:transaction_report' %}" class="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-white mr-4">
-                    Home
+                    Transaction
                 </a>
                 <a href="{% url 'transactions:deposit_money' %}" class="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-white mr-4">
                     Deposit
@@ -27,16 +27,16 @@
                 </a>
             </div>
             <div class="flex w-auto">
-                <div class="text-blue-900 my-auto font-black px-5">Welcome, {{ request.user.first_name }} {{ request.user.last_name }}!</div>
-                <a href="{% url 'accounts:user_logout' %}" class="mx-2 inline-block font-medium text-sm px-4 py-2 leading-none bg-blue-900 rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0">Logout</a>
+                <div class="text-white my-auto font-black px-5">Welcome, {{ request.user.first_name }} {{ request.user.last_name }}!</div>
+                <a href="{% url 'accounts:user_logout' %}" class="mx-2 inline-block font-medium text-sm px-4 py-2 leading-none bg-white rounded text-black border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0">Logout</a>
             </div>
         {% else %}
             <div class="text-md lg:flex-grow"></div>
             <div>
-                <a href="{% url 'accounts:user_login' %}" class="mr-2 inline-block font-medium text-sm px-4 py-2 leading-none bg-blue-900 rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0">Login</a>
+                <a href="{% url 'accounts:user_login' %}" class="mr-2 inline-block font-medium text-sm px-4 py-2 leading-none bg-white rounded text-black border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0">Login</a>
             </div>
             <div>
-                <a href="{% url 'accounts:user_registration' %}" class="inline-block font-medium text-sm px-4 py-2 leading-none bg-blue-900 rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0">Register</a>
+                <a href="{% url 'accounts:user_registration' %}" class="inline-block font-medium text-sm px-4 py-2 leading-none bg-white rounded text-black border-white hover:border-transparent hover:text-gray-800 hover:bg-white mt-4 lg:mt-0">Register</a>
             </div>
         {% endif %}
     </div>
