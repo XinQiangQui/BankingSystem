@@ -9,14 +9,6 @@ from accounts.models import User
 from decimal import Decimal
 from django.http import HttpResponseRedirect
 
-
-
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.core.mail import send_mail
-import math, random
-from django.shortcuts import get_object_or_404
-
 from .constants import DEPOSIT, WITHDRAWAL, TRANSFER
 from .forms import (
     DepositForm,
@@ -164,7 +156,6 @@ class TransferMoneyView(TransactionCreateMixin):
 
         tmpUsers = User.objects.filter(is_staff=False)
         target = None
-        #success = True
 
         for i in tmpUsers:
             account_num = i.account.account_no
@@ -174,37 +165,14 @@ class TransferMoneyView(TransactionCreateMixin):
                 self.request.user.account.save(update_fields=['balance'])
                 i.account.balance += amount
                 i.account.save(update_fields=['balance'])
-                #send_otp(request)
-
-        #if success:
 
         messages.success(
             self.request,
             f'Successfully transfer {"{:,.2f}".format(amount)}$ from your account to target account :{accNum}'
         )
 
-        #newform = TransferForm()
-        #newform.account = self.request.user.account.account_no
-
-        #form = self.form_valid(newform)
         return HttpResponseRedirect(self.request.path_info)
 
     def form_valid(self, form):
         return super().form_valid(form)
 
-
-#otp
-def generateOTP():
-    digits = "0123456789"
-    OTP = ""
-    for i in range(4):
-        OTP += digits[math.floor(random.random() * 10)]
-    return OTP
-
-
-def send_otp(request):
-    email=request.user.email
-    o=generateOTP()
-    htmlgen = '<p>Your OTP is <strong>'+o+'</strong></p>'
-    send_mail('OTP request',o,'<gmail id>',[email],fail_silently=False,html_message=htmlgen)
-    return HttpResponse(o)

@@ -17,7 +17,6 @@ class TransactionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.account = kwargs.pop('account')
-        print(self.account)
         super().__init__(*args, **kwargs)
         self.fields['transaction_type'].disabled = True
         self.fields['transaction_type'].widget = forms.HiddenInput()

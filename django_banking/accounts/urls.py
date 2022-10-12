@@ -1,5 +1,6 @@
 from django.urls import path
 
+from . import views
 from .views import UserRegistrationView, LogoutView, UserLoginView, ProfileDisplayView
 
 
@@ -21,5 +22,8 @@ urlpatterns = [
     path(
         "profile/", ProfileDisplayView.as_view(),
         name="profile"
+    ),
+    path(
+        "otp/", views.otp_view, name="otp"
     ),
 ]
