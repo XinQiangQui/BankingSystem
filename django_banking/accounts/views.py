@@ -1,19 +1,17 @@
-from django.contrib import messages
 from django.contrib.auth import get_user_model, login, logout
-from django.contrib.auth.views import LoginView
+from django.contrib import messages
 from django.core.mail import send_mail
 from django.shortcuts import HttpResponseRedirect
+from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, RedirectView
-from django.conf import settings
+from accounts.models import OTP
 import math, random
 
 from .forms import UserRegistrationForm, UserAddressForm
 
-
 User = get_user_model()
-
 
 class UserRegistrationView(TemplateView):
     model = User
@@ -66,7 +64,7 @@ class UserRegistrationView(TemplateView):
 
 
 class UserLoginView(LoginView):
-    template_name='accounts/user_login.html'
+    template_name = 'accounts/user_login.html'
     redirect_authenticated_user = False
 
 class ProfileDisplayView(TemplateView):
@@ -99,40 +97,61 @@ class LogoutView(RedirectView):
         return super().get_redirect_url(*args, **kwargs)
 
 
-def otp_view(request):
+class OTPReceiveView(TemplateView):
+    template_name = 'accounts/otp.html'
+
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            digits = "0123456789"
+            otp = ""
+            for i in range(4):
+                otp += digits[math.floor(random.random() * 10)]
+            print(otp)
+            email = request.user.email
+            send_mail(
+                'OTP',
+                'Your OTP is ' + otp,
+                'aston.qxq@gmail.com',
+                ['testing111otp@gmail.com'],
+                fail_silently=False,
+            )
+            if OTP.objects.all().count() < 1:
+                tmpOTP = OTP.objects.create()
+                tmpOTP.otp = otp
+                tmpOTP.save()
+            else:
+                tmpOTP = OTP.objects.get(id=1)
+                tmpOTP.otp = otp
+                tmpOTP.save()
+
+            if request.user is not None:
+                login(request, request.user)
+                return redirect('/accounts/otp_submit_view')
+
+        return render(request, "accounts/otp_submit.html")
 
 
-    # generate otp
-    digits = "0123456789"
-    otp = ""
-    for i in range(4):
-        otp += digits[math.floor(random.random() * 10)]
-    print(otp)
-    email = request.user.email
-    send_mail(
-        'OTP',
-        'Your OTP is ' + otp,
-        'aston.qxq@gmail.com',
-        ['testing111otp@gmail.com'],
-        fail_silently=False,
-    )
+class OTPSubmitView(TemplateView):
+    template_name = 'accounts/otp_submit.html'
 
-    otp_entered = request.POST['otp']
-    if otp == otp_entered:
-        email = request.user.email
-        gender = request.user.account.gender
-        account_no = request.user.account.account_no
-        birth_date = request.user.account.birth_date
-        balance = request.user.account.balance
-        address = request.user.address.street_address + ', ' + request.user.address.city + ', ' + request.user.address.country
+    def post(self, request, *args, **kwargs):
+        otp_entered = request.POST['otp']
+        if OTP.objects.get(id=1).otp == otp_entered:
+            email = request.user.email
+            gender = request.user.account.gender
+            account_no = request.user.account.account_no
+            birth_date = request.user.account.birth_date
+            balance = request.user.account.balance
+            address = request.user.address.street_address + ', ' + request.user.address.city + ', ' + request.user.address.country
 
-        dict = {"email": email,
-                "gender": gender,
-                "account_no": account_no,
-                "birth_date": birth_date,
-                "balance": balance,
-                "address": address,
-                }
-        return render(request, "accounts/profile.html", context=dict)
+            dict = {"email": email,
+                    "gender": gender,
+                    "account_no": account_no,
+                    "birth_date": birth_date,
+                    "balance": balance,
+                    "address": address,
+                    }
 
-    return render(request, "accounts/user_login.html")
+            return render(request, "accounts/profile.html", context=dict)
+
+        return render(request, "accounts/user_login.html")

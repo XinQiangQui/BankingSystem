@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>This is otp submit page</title>
+</head>
+<body>
+    <h2>Enter your OTP</h2>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        <label for="otp">OTP:</label><br>
+        <input type="text" id="otp" name="otp"><br>
+        <button type="submit" name="enter">Submit</button>
+    </form>>
+</body>
+</html>

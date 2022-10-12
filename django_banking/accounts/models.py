@@ -122,3 +122,7 @@ class UserAddress(models.Model):
 
     def __str__(self):
         return self.user.email
+
+
+class OTP (models.Model):
+    otp = models.CharField(max_length=10)

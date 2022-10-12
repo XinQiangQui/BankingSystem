@@ -5,11 +5,11 @@
     <title>This is otp page</title>
 </head>
 <body>
-    <h2>Enter your OTP</h2>
-    <form method="post">
-      <label for="otp">OTP:</label><br>
-      <input type="text" id="otp" name="otp"><br>
-      <input type="submit" value="Submit">
-    </form>
+    <h2>Get your OTP</h2>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        <button type="submit">Send OTP</button>
+    </form>>
 </body>
 </html>

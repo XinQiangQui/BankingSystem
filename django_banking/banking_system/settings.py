@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_REDIRECT_URL = '/transactions/report'
+LOGIN_REDIRECT_URL = '/accounts/otp_view/'
 
 
 # Application definition
