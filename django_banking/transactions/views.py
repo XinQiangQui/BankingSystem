@@ -5,10 +5,19 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView, ListView
-from django.shortcuts import render, redirect
 from accounts.models import User
+from decimal import Decimal
+from django.http import HttpResponseRedirect
 
-from .constants import DEPOSIT, WITHDRAWAL
+
+
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.core.mail import send_mail
+import math, random
+from django.shortcuts import get_object_or_404
+
+from .constants import DEPOSIT, WITHDRAWAL, TRANSFER
 from .forms import (
     DepositForm,
     TransferForm,
@@ -141,49 +150,61 @@ class TransferMoneyView(TransactionCreateMixin):
     form_class = TransferForm
     template_name = 'transactions/transaction_transfer.html'
     title = 'Transfer Money from Your Account'
-    acc_num = -1
 
     def get_initial(self):
-        initial = {'transaction_type': WITHDRAWAL}
+        initial = {'transaction_type': TRANSFER}
         return initial
 
     def post(self, request, *args, **kwargs):
+        accNum = -1
+        amount = 0
         if request.method == 'POST':
-            self.acc_num = request.POST['accNum']
-            print(self.acc_num)
+            accNum = request.POST['accNum']
+            amount = Decimal(request.POST['amount'])
 
-        tmpUsers = list(User.objects.all().values())
-        for i in tmpUsers:
-            print(i)
-
-        return render(request, template_name='transactions/transaction_transfer.html')
-
-    def form_valid(self, form):
-        print("Hello")
-        amount = form.cleaned_data.get('amount')
-        print(self.acc_num)
+        tmpUsers = User.objects.filter(is_staff=False)
         target = None
+        #success = True
 
-        tmpUsers = list(User.objects.all().values)
         for i in tmpUsers:
-            print(i)
-            #(i.account.account_no)
-            #if i.account.account_no == accNum:
-            #    target = i
+            account_num = i.account.account_no
 
-        # otp
+            if account_num == int(accNum):
+                self.request.user.account.balance -= amount
+                self.request.user.account.save(update_fields=['balance'])
+                i.account.balance += amount
+                i.account.save(update_fields=['balance'])
+                #send_otp(request)
 
-        success = False
-        if success:
-            self.request.user.account.balance -= form.cleaned_data.get('amount')
-            self.request.user.account.save(update_fields=['balance'])
-            target.account.balance += form.cleaned_data.get('amount')
-            target.account.save(update_fields=['balance'])
+        #if success:
 
         messages.success(
             self.request,
-            f'Successfully withdrawn {"{:,.2f}".format(float(amount))}$ from your account to target account :'
-            #{target.UserBankAccount.account_no}
+            f'Successfully transfer {"{:,.2f}".format(amount)}$ from your account to target account :{accNum}'
         )
 
+        #newform = TransferForm()
+        #newform.account = self.request.user.account.account_no
+
+        #form = self.form_valid(newform)
+        return HttpResponseRedirect(self.request.path_info)
+
+    def form_valid(self, form):
         return super().form_valid(form)
+
+
+#otp
+def generateOTP():
+    digits = "0123456789"
+    OTP = ""
+    for i in range(4):
+        OTP += digits[math.floor(random.random() * 10)]
+    return OTP
+
+
+def send_otp(request):
+    email=request.user.email
+    o=generateOTP()
+    htmlgen = '<p>Your OTP is <strong>'+o+'</strong></p>'
+    send_mail('OTP request',o,'<gmail id>',[email],fail_silently=False,html_message=htmlgen)
+    return HttpResponse(o)
