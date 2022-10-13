@@ -112,7 +112,7 @@ class OTPReceiveView(TemplateView):
                 'OTP',
                 'Your OTP is ' + otp,
                 'aston.qxq@gmail.com',
-                ['testing111otp@gmail.com'],
+                [email],
                 fail_silently=False,
             )
             if OTP.objects.all().count() < 1:
