@@ -33,6 +33,7 @@ class DepositForm(TransactionForm):
         min_deposit_amount = settings.MINIMUM_DEPOSIT_AMOUNT
         amount = self.cleaned_data.get('amount')
 
+        # if amount i s lesser than the $10, throw message
         if amount < min_deposit_amount:
             raise forms.ValidationError(
                 f'You need to deposit at least {min_deposit_amount} $'
@@ -52,16 +53,19 @@ class WithdrawForm(TransactionForm):
 
         amount = self.cleaned_data.get('amount')
 
+        # if amount is lesser than the min_amount, throw message
         if amount < min_withdraw_amount:
             raise forms.ValidationError(
                 f'You can withdraw at least {min_withdraw_amount} $'
             )
 
+        # if amount is greater than the max_amount, throw message
         if amount > max_withdraw_amount:
             raise forms.ValidationError(
                 f'You can withdraw at most {max_withdraw_amount} $'
             )
 
+        # if amount is greater than current balance, throw message
         if amount > balance:
             raise forms.ValidationError(
                 f'You have {balance} $ in your account. '
@@ -79,11 +83,13 @@ class TransferForm(TransactionForm):
 
         amount = self.cleaned_data.get('amount')
 
+        # if transfer_amount is lesser than $0, throw message
         if amount < 0:
             raise forms.ValidationError(
                 f'Transfer amount cannot be negative.'
             )
 
+        # if transfer_amount is greater than current balance, throw message
         if amount > balance:
             raise forms.ValidationError(
                 f'You have {balance} $ in your account. '
@@ -96,6 +102,7 @@ class TransferForm(TransactionForm):
 class TransactionDateRangeForm(forms.Form):
     daterange = forms.CharField(required=False)
 
+    # function that finds all the transactions done from the dateA to dateB
     def clean_daterange(self):
         daterange = self.cleaned_data.get("daterange")
         print(daterange)

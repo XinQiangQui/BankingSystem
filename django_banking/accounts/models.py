@@ -9,7 +9,7 @@ from django.db import models
 
 from .constants import GENDER_CHOICE
 from .managers import UserManager
-
+from django_cryptography.fields import encrypt
 
 class User(AbstractUser):
     username = None
@@ -31,7 +31,7 @@ class User(AbstractUser):
 
 
 class BankAccountType(models.Model):
-    name = models.CharField(max_length=128)
+    name = encrypt(models.CharField(max_length=128))
     maximum_withdrawal_amount = models.DecimalField(
         decimal_places=2,
         max_digits=12
@@ -51,16 +51,10 @@ class BankAccountType(models.Model):
         return self.name
 
     def calculate_interest(self, principal):
-        """
-        Calculate interest for each account type.
-
-        This uses a basic interest calculation formula
-        """
+        # Calculate interest for each account type using a basic interest calculation formula
         p = principal
         r = self.annual_interest_rate
         n = Decimal(self.interest_calculation_per_year)
-
-        # Basic Future Value formula to calculate interest
         interest = (p * (1 + ((r/100) / n))) - p
 
         return round(interest, 2)
@@ -77,9 +71,9 @@ class UserBankAccount(models.Model):
         related_name='accounts',
         on_delete=models.CASCADE
     )
-    account_no = models.PositiveIntegerField(unique=True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICE)
-    birth_date = models.DateField(null=True, blank=True)
+    account_no = encrypt(models.PositiveIntegerField(unique=True))
+    gender = encrypt(models.CharField(max_length=1, choices=GENDER_CHOICE))
+    birth_date = encrypt(models.DateField(null=True, blank=True))
     balance = models.DecimalField(
         default=0,
         max_digits=12,
@@ -97,15 +91,13 @@ class UserBankAccount(models.Model):
         return str(self.account_no)
 
     def get_interest_calculation_months(self):
-        """
-        List of month numbers for which the interest will be calculated
-
-        returns [2, 4, 6, 8, 10, 12] for every 2 months interval
-        """
+        # List of month numbers for which the interest will be calculated
         interval = int(
             12 / self.account_type.interest_calculation_per_year
         )
         start = self.interest_start_date.month
+
+        # returns [2, 4, 6, 8, 10, 12] for every 2 months interval
         return [i for i in range(start, 13, interval)]
 
 
@@ -115,10 +107,10 @@ class UserAddress(models.Model):
         related_name='address',
         on_delete=models.CASCADE,
     )
-    street_address = models.CharField(max_length=512)
-    city = models.CharField(max_length=256)
-    postal_code = models.PositiveIntegerField()
-    country = models.CharField(max_length=256)
+    street_address = encrypt(models.CharField(max_length=512))
+    city = encrypt(models.CharField(max_length=256))
+    postal_code = encrypt(models.PositiveIntegerField())
+    country = encrypt(models.CharField(max_length=256))
 
     def __str__(self):
         return self.user.email

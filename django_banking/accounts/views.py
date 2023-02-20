@@ -26,9 +26,11 @@ class UserRegistrationView(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        # create user registration form and address form with the data from request.POST
         registration_form = UserRegistrationForm(self.request.POST)
         address_form = UserAddressForm(self.request.POST)
 
+        # if both forms are valid, save the forms and login
         if registration_form.is_valid() and address_form.is_valid():
             user = registration_form.save()
             address = address_form.save(commit=False)
@@ -62,7 +64,6 @@ class UserRegistrationView(TemplateView):
 
         return super().get_context_data(**kwargs)
 
-
 class UserLoginView(LoginView):
     template_name = 'accounts/user_login.html'
     redirect_authenticated_user = False
@@ -71,6 +72,8 @@ class ProfileDisplayView(TemplateView):
     template_name = 'accounts/profile.html'
 
     def get(self, request, *args, **kwargs):
+
+        # obtain user's information from the database
         email = request.user.email
         gender = request.user.account.gender
         account_no = request.user.account.account_no
@@ -78,6 +81,7 @@ class ProfileDisplayView(TemplateView):
         balance = request.user.account.balance
         address = request.user.address.street_address + ', ' + request.user.address.city + ', ' + request.user.address.country
 
+        # create a dictionary to keep user's information
         dict = {"email": email,
                 "gender": gender,
                 "account_no": account_no,
@@ -85,6 +89,7 @@ class ProfileDisplayView(TemplateView):
                 "balance": balance,
                 "address": address,
                 }
+
         return render(request, "accounts/profile.html", context=dict)
 
 
@@ -101,13 +106,17 @@ class OTPReceiveView(TemplateView):
     template_name = 'accounts/otp.html'
 
     def post(self, request, *args, **kwargs):
+
+        # create otp
         if request.method == "POST":
             digits = "0123456789"
             otp = ""
+            # generate a 4 digits number
             for i in range(4):
                 otp += digits[math.floor(random.random() * 10)]
             print(otp)
             email = request.user.email
+            # send the otp to the user's email
             send_mail(
                 'OTP',
                 'Your OTP is ' + otp,
@@ -115,6 +124,7 @@ class OTPReceiveView(TemplateView):
                 [email],
                 fail_silently=False,
             )
+            # save otp in database
             if OTP.objects.all().count() < 1:
                 tmpOTP = OTP.objects.create()
                 tmpOTP.otp = otp
@@ -135,7 +145,10 @@ class OTPSubmitView(TemplateView):
     template_name = 'accounts/otp_submit.html'
 
     def post(self, request, *args, **kwargs):
+        # get otp entered by user
         otp_entered = request.POST['otp']
+
+        # if the otp entered equals the otp in the database, proceed to profile
         if OTP.objects.get(id=1).otp == otp_entered:
             email = request.user.email
             gender = request.user.account.gender

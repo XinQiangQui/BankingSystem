@@ -7,8 +7,8 @@ from .models import User, BankAccountType, UserBankAccount, UserAddress
 from .constants import GENDER_CHOICE
 
 
+# form for user address
 class UserAddressForm(forms.ModelForm):
-
     class Meta:
         model = UserAddress
         fields = [
@@ -32,6 +32,7 @@ class UserAddressForm(forms.ModelForm):
             })
 
 
+# form for user registration
 class UserRegistrationForm(UserCreationForm):
     account_type = forms.ModelChoiceField(
         queryset=BankAccountType.objects.all()
@@ -68,6 +69,8 @@ class UserRegistrationForm(UserCreationForm):
     @transaction.atomic
     def save(self, commit=True):
         user = super().save(commit=False)
+        # set_password function
+        # Django uses the PBKDF2 algorithm with a SHA256 hash
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.save()

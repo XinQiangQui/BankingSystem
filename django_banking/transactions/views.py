@@ -19,6 +19,7 @@ from .forms import (
 from .models import Transaction
 
 
+# class for transaction_report page
 class TransactionRepostView(LoginRequiredMixin, ListView):
     template_name = 'transactions/transaction_report.html'
     model = Transaction
@@ -75,6 +76,7 @@ class TransactionCreateMixin(LoginRequiredMixin, CreateView):
         return context
 
 
+# class for deposit page
 class DepositMoneyView(TransactionCreateMixin):
     form_class = DepositForm
     title = 'Deposit Money'
@@ -99,6 +101,7 @@ class DepositMoneyView(TransactionCreateMixin):
                 )
             )
 
+        # update account_balance after deposit
         account.balance += amount
         account.save(
             update_fields=[
@@ -108,6 +111,7 @@ class DepositMoneyView(TransactionCreateMixin):
             ]
         )
 
+        # throw success message
         messages.success(
             self.request,
             f'{"{:,.2f}".format(float(amount))}$ was deposited to your account successfully'
@@ -116,6 +120,7 @@ class DepositMoneyView(TransactionCreateMixin):
         return super().form_valid(form)
 
 
+# class for withdraw page
 class WithdrawMoneyView(TransactionCreateMixin):
     form_class = WithdrawForm
     title = 'Withdraw Money'
@@ -127,9 +132,11 @@ class WithdrawMoneyView(TransactionCreateMixin):
     def form_valid(self, form):
         amount = form.cleaned_data.get('amount')
 
+        # update account_balance after withdrawal
         self.request.user.account.balance -= form.cleaned_data.get('amount')
         self.request.user.account.save(update_fields=['balance'])
 
+        # throw success message
         messages.success(
             self.request,
             f'Successfully withdrawn {"{:,.2f}".format(float(amount))}$ from your account'
@@ -138,6 +145,7 @@ class WithdrawMoneyView(TransactionCreateMixin):
         return super().form_valid(form)
 
 
+# class for transfer page
 class TransferMoneyView(TransactionCreateMixin):
     form_class = TransferForm
     template_name = 'transactions/transaction_transfer.html'
@@ -150,6 +158,7 @@ class TransferMoneyView(TransactionCreateMixin):
     def post(self, request, *args, **kwargs):
         accNum = -1
         amount = 0
+        # get target account number and transfer amount
         if request.method == 'POST':
             accNum = request.POST['accNum']
             amount = Decimal(request.POST['amount'])
@@ -157,15 +166,18 @@ class TransferMoneyView(TransactionCreateMixin):
         tmpUsers = User.objects.filter(is_staff=False)
         target = None
 
+        # search for the target account in the database
         for i in tmpUsers:
             account_num = i.account.account_no
 
+            # if account is found, update the user account balance and target account balance
             if account_num == int(accNum):
                 self.request.user.account.balance -= amount
                 self.request.user.account.save(update_fields=['balance'])
                 i.account.balance += amount
                 i.account.save(update_fields=['balance'])
 
+        # throw success message
         messages.success(
             self.request,
             f'Successfully transfer {"{:,.2f}".format(amount)}$ from your account to target account :{accNum}'
